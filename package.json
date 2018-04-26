@@ -1,0 +1,12 @@
+{
+  "name": "regess",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:samsartor/regess.git",
+  "author": "Sam Sartor <me@samsartor.com>",
+  "license": "MIT",
+  "dependencies": {
+    "parcel-bundler": "1.7.0",
+    "parcel-plugin-cargo-web": "https://github.com/koute/parcel-plugin-cargo-web"
+  }
+}

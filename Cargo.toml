@@ -1,0 +1,12 @@
+[package]
+name = "regess"
+version = "0.1.0"
+authors = ["Sam Sartor <me@samsartor.com>"]
+
+[dependencies]
+serde = "^1.0"
+serde_json = "^1.0"
+serde_derive = "^1.0"
+stdweb = "0.4"
+regex-syntax = "0.5"
+petgraph = "0.4"
