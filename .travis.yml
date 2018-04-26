@@ -1,0 +1,22 @@
+language: rust
+rust:
+  - nightly
+cache:
+  yarn: true
+  cargo: true
+git:
+  depth: 1
+before_intall:
+  - nvm install 8
+  - export PATH=$HOME/.cargo/bin:$HOME/.yarn/bin:$PATH
+install: bash ./ci/install.sh
+script: cargo web test --target wasm32-unknown-unknown --nodejs
+before_deploy: parcel build index.html --public-url ./
+deploy:
+  local-dir: dist
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN
+  keep-history: true
+  on:
+    branch: master
