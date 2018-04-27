@@ -39,8 +39,9 @@ pub fn main() {
     let b = gr.add_node(Node::new());
     let c = gr.add_node(Node::end());
     gr.add_edge(a, b, Edge::new("ε"));
+    gr.add_edge(a, b, Edge::new("a"));
+    gr.add_edge(b, c, Edge::new("b"));
     gr.add_edge(a, c, Edge::new("\\n"));
-    gr.add_edge(b, c, Edge::new("!"));
 
     if let Some(b) = web::document().get_element_by_id("show") {
         b.add_event_listener(move |_: event::ClickEvent| {

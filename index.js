@@ -1,3 +1,4 @@
+import "./main.scss"
 import regess from "./Cargo.toml"
 import * as d3 from "d3"
 import "d3-graphviz"
