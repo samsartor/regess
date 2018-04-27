@@ -95,66 +95,102 @@ impl Grapher {
     }
 }
 
-fn find_collapse(g: &Graph) -> Option<(Nodei, Nodei)> {
-    for node in g.node_indices() {
-        // terminal nodes are an exception
-        if g[node].end { continue }
 
-        let mut edges = g.edges(node);
-        // if has outgoing edge
-        let edge = match edges.next() {
-            Some(e) => e,
-            None => continue,
-        };
-        // if only edge is epsilon
-        match (edge.weight(), edges.next()) {
-            (Edge::Epsilon, None) => return Some((node, edge.target())),
-            _ => (),
-        }
-    }
-    None
-}
+// - deduplicate
+// - unify ε cycles
+// - unify ε trees
+// - backpropagate ε-termination
 
-fn find_split_end(g: &Graph) -> Option<Edgei> {
-    for node in g.node_indices() {
-        if g.edges(node).count() == 0 { // terminal node
-            for edge in g.edges_directed(node, Direction::Incoming) {
-                if *edge.weight() == Edge::Epsilon { // can split
-                    return Some(edge.id());
-                }
-            }
-        }
+fn merge(nodes: &[Nodei], graph: &mut Graph) {
+    use self::Direction::*;
+
+    let mut node = Node::mid();
+    let mut outs = Vec::new();
+    let mut ins = Vec::new();
+
+    for &n in nodes {
+        node = Node::merge(node, graph[n]);
+        outs.extend(graph
+            .edges_directed(n, Outgoing)
+            .map(|e| (n, e.weight().clone(), e.target())));
+        ins.extend(graph
+            .edges_directed(n, Incoming)
+            .map(|e| (e.source(), e.weight().clone(), n))
+            .filter(|&(s, _, t)| s != t)); // remove self edges
     }
 
-    None
+    let node = graph.add_node(node);
+    for (o, w, mut t) in outs {
+        if o == t { t = node }; // re-target self edge
+        graph.add_edge(node, t, w);
+    }
+    for (s, w, _) in ins {
+        graph.add_edge(s, node, w);
+    }
+    for &n in nodes { graph.remove_node(n); }
 }
 
 // TODO: tests and optimizations (`StableGraph`?)
-// TODO: simplify "b*c"
 fn simplify(g: &mut Graph) {
-    // deduplicate
+    // ===============
+    // | deduplicate |
+    // ===============
     let mut set = ::std::collections::HashSet::new();
     g.retain_edges(|g, e| set.insert((g[e].clone(), g.edge_endpoints(e).unwrap())));
 
-    // split terminals
-    while let Some(e) = find_split_end(g) {
-        let (s, t) = g.edge_endpoints(e).unwrap();
-        g[s] = Node::merge(g[s], g[t]);
-        g.remove_edge(e);
+    // ==================
+    // | unify ε cycles |
+    // ==================
+    // TODO
+
+    // =================
+    // | unify ε trees |
+    // =================
+    fn find_eps_edge(g: &Graph) -> Option<Edgei> {
+        use self::Direction::*;
+
+        for edge in g.edge_indices() {
+            if g[edge] != Edge::Epsilon {
+                // can't combine, has state change
+                continue
+            }
+
+            let (a, b) = g.edge_endpoints(edge).unwrap();
+
+            // no extra outputs that might not be universally connected
+            let mut only_out = g.edges_directed(a, Outgoing).count() == 1;
+            only_out &= !g[a].end;
+
+            // no extra inputs that might not be universally connected
+            let mut only_in = g.edges_directed(b, Incoming).count() == 1;
+            only_in &= !g[b].start;
+
+            if only_in || only_out {
+                // can combine, no unconnected outer edges!
+                return Some(edge)
+            }
+        }
+
+        // couldn't find opportunity for simplification
+        None
     }
 
-    // remove single epsilons
-    while let Some((s, t)) = find_collapse(g) {
-        let mut to_add = Vec::new();
-        for e in g.edges_directed(s, Direction::Incoming) {
-            to_add.push((e.source(), t, e.weight().clone()));
+    // do removal
+    while let Some(e) = find_eps_edge(g) {
+        let (a, b) = g.edge_endpoints(e).unwrap();
+        if a != b {
+            // nodes are different, merge
+            merge(&[a, b], g);
+        } else {
+            // nodes are same, just remove edge
+            g.remove_edge(e);
         }
-        for (a, b, w) in to_add {
-            g.add_edge(a, b, w);
-        }
-        g[t] = Node::merge(g[s], g[t]);
-        g.remove_node(s);
     }
+
+    // =============================
+    // | backpropagate termination |
+    // =============================
+    // TODO
 
     // remove unconnected
     g.retain_nodes(|g, n| g.neighbors_undirected(n).count() > 0);
