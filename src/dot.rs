@@ -1,23 +1,21 @@
 use petgraph::Graph;
 
-#[derive(Clone, Debug)]
-pub struct Node {
-    pub end: bool,
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+pub enum Node {
+    Start,
+    Mid,
+    End,
 }
 
-impl Node {
-    pub fn new() -> Node { Node { end: false } }
-    pub fn end() -> Node { Node { end: true } }
-}
-
-#[derive(Clone, Debug)]
-pub struct Edge {
-    pub label: String,
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+pub enum Edge {
+    Epsilon,
+    Labeled(String),
 }
 
 impl Edge {
     pub fn new<L: ToString>(label: L) -> Edge {
-        Edge { label: label.to_string() }
+        Edge::Labeled(label.to_string())
     }
 }
 
@@ -27,16 +25,23 @@ pub fn write_dot<W: Write>(graph: &Graph<Node, Edge>, to: &mut W) -> IoResult<()
     writeln!(to, "digraph  {{\n")?;
     for id in graph.node_indices() {
         let node = &graph[id];
-        let shape = match node.end {
-            true => "doublecircle",
-            false => "circle",
+        let shape = match node {
+            Node::End => "doublecircle",
+            _ => "circle",
         };
-        writeln!(to, "\tnode [shape={}, label=\"\"] {};", shape, id.index())?;
+        let label = match node {
+            Node::Start => "S",
+            _ => "",
+        };
+        writeln!(to, "\tnode [shape={}, label=\"{}\"] {};", shape, label, id.index())?;
     }
     for id in graph.edge_indices() {
         let (left, right) = graph.edge_endpoints(id).unwrap();
-        let edge = &graph[id];
-        writeln!(to, "\t{} -> {} [label = \"{}\"];", left.index(), right.index(), edge.label.escape_debug())?;
+        let label = match graph[id] {
+            Edge::Epsilon => "ε",
+            Edge::Labeled(ref l) => l.as_str(),
+        };
+        writeln!(to, "\t{} -> {} [label = \"{}\"];", left.index(), right.index(), label.escape_debug())?;
     }
     writeln!(to, "}}")?;
     Ok(())
