@@ -5,10 +5,12 @@
   "repository": "git@github.com:samsartor/regess.git",
   "author": "Sam Sartor <me@samsartor.com>",
   "license": "MIT",
+  "devDependencies": {
+    "parcel-bundler": "1.7.0",
+    "parcel-plugin-cargo-web": "^0.2.0"
+  },
   "dependencies": {
     "d3": "^5.1.0",
-    "d3-graphviz": "^1.6.1",
-    "parcel-bundler": "1.7.0",
-    "parcel-plugin-cargo-web": "https://github.com/koute/parcel-plugin-cargo-web"
+    "d3-graphviz": "^1.6.1"
   }
 }

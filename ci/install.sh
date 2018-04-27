@@ -1,8 +1,20 @@
 #!/usr/bin/bash
 set -ex
 
-yarn global add parcel-bundler@1.7.0
+# Install cargo-web
+CARGO_WEB_RELEASE=$(curl -L -s -H 'Accept: application/json' https://github.com/koute/cargo-web/releases/latest)
+CARGO_WEB_VERSION=$(echo $CARGO_WEB_RELEASE | sed -e 's/.*"tag_name":"\([^"]*\)".*/\1/')
+CARGO_WEB_URL="https://github.com/koute/cargo-web/releases/download/$CARGO_WEB_VERSION/cargo-web-x86_64-unknown-linux-gnu.gz"
 
-if ! cargo install --list | grep "cargo-web v0.6"; then
-    cargo install cargo-web --force --version "^0.6.10"
-fi
+echo "Downloading cargo-web from: $CARGO_WEB_URL"
+curl -L $CARGO_WEB_URL | gzip -d > cargo-web
+chmod +x cargo-web
+
+mkdir -p ~/.cargo/bin
+mv cargo-web ~/.cargo/bin
+
+# Install yarn packeges
+yarn install
+
+# Build rust package
+rustup run nightly cargo-web build --target wasm32-unknown-unknown --runtime experimental-only-loader --message-format json

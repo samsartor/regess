@@ -8,10 +8,10 @@ git:
   depth: 1
 before_intall:
   - nvm install 8
-  - export PATH=$HOME/.cargo/bin:$HOME/.yarn/bin:$PATH
+  - export PATH=$HOME/.cargo/bin
 install: bash ./ci/install.sh
 script: cargo web test --target wasm32-unknown-unknown --nodejs
-before_deploy: parcel build index.html --public-url ./
+before_deploy: yarn run parcel build index.html --no-minify --public-url ./
 deploy:
   local-dir: dist
   provider: pages
