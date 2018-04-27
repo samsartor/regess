@@ -1,10 +1,23 @@
 use petgraph::Graph;
 
-#[derive(Clone, Debug, Hash, PartialEq, Eq)]
-pub enum Node {
-    Start,
-    Mid,
-    End,
+#[derive(Copy, Clone, Debug, Hash, PartialEq, Eq)]
+pub struct Node {
+    pub start: bool,
+    pub end: bool,
+}
+
+impl Node {
+    pub fn new(start: bool, end: bool) -> Node {
+        Node { start, end }
+    }
+
+    pub fn start() -> Node { Node::new(true, false) }
+    pub fn end() -> Node { Node::new(false, true) }
+    pub fn mid() -> Node { Node::new(false, false) }
+
+    pub fn merge(a: Node, b: Node) -> Node {
+        Node::new(a.start || b.start, a.end || b.end)
+    }
 }
 
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
@@ -25,13 +38,13 @@ pub fn write_dot<W: Write>(graph: &Graph<Node, Edge>, to: &mut W) -> IoResult<()
     writeln!(to, "digraph  {{\n")?;
     for id in graph.node_indices() {
         let node = &graph[id];
-        let shape = match node {
-            Node::End => "doublecircle",
-            _ => "circle",
+        let shape = match node.end {
+            true => "doublecircle",
+            false => "circle",
         };
-        let label = match node {
-            Node::Start => "S",
-            _ => "",
+        let label = match node.start {
+            true => "S",
+            false => "",
         };
         writeln!(to, "\tnode [shape={}, label=\"{}\"] {};", shape, label, id.index())?;
     }
