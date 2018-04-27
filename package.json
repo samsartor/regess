@@ -6,6 +6,8 @@
   "author": "Sam Sartor <me@samsartor.com>",
   "license": "MIT",
   "dependencies": {
+    "d3": "^5.1.0",
+    "d3-graphviz": "^1.6.1",
     "parcel-bundler": "1.7.0",
     "parcel-plugin-cargo-web": "https://github.com/koute/parcel-plugin-cargo-web"
   }
