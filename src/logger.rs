@@ -1,4 +1,5 @@
 use log::{Metadata, Record, Log};
+use alert::{show_alert, AlertMode};
 
 pub struct Logger;
 impl Log for Logger {
@@ -6,11 +7,22 @@ impl Log for Logger {
 
     fn log(&self, record: &Record) {
         let level = record.level();
+        let msg = format!("{}", record.args());
+
         use log::Level::*;
         let meth = match level {
-            Error => "error",
-            Warn => "warn",
-            Info => "info",
+            Error => {
+                show_alert(&msg, AlertMode::Error);
+                "error"
+            },
+            Warn => {
+                show_alert(&msg, AlertMode::Warn);
+                "warn"
+            },
+            Info => {
+                show_alert(&msg, AlertMode::Info);
+                "info"
+            },
             Debug => "debug",
             Trace => "debug",
         };
