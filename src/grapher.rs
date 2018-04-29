@@ -67,6 +67,8 @@ impl Grapher {
         right: Nodei,
         machine: &mut Graph
     ) -> Result<(), Error> {
+        let hir = self.trans.build().translate("" /* TODO: need source */, ast)?;
+
         use self::Ast::*;
 
         match *ast {
@@ -142,7 +144,6 @@ impl Grapher {
             },
             Assertion(_) => (),
             _ => {
-                let hir = self.trans.build().translate("" /* TODO: need source */, ast)?;
                 match self.try_hir_connect(&hir, left, right, machine) {
                     Ok(()) => (),
                     Err(None) => {

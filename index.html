@@ -1,16 +1,32 @@
 <html>
   <head>
     <script src="./index.js"></script>
+    <title>Regess</title>
+    <link rel="shortcut icon" href="assets/favicon.png" type="image/png">
   </head>
   <body>
+    <nav class="navbar navbar-expand-mg navbar-light bg-light">
+      <a class="navbar-brand" href="#">
+        <img src="./assets/logo.svg" width="30" height="30" class="d-inline-block align-top" alt="">
+        Regess
+      </a>
+      <div class="mx-auto order-0">
+        A regex state-machine visulizer.
+      </div>
+      <a class="btn btn-outline-dark" href="https://github.com/samsartor/regess">GitHub</a>
+    </nav>
     <div class="container-fluid">
       <div class="input-group pt-2 pb-2">
         <div class="input-group-prepend">
           <span class="input-group-text" id="">Regex</span>
         </div>
-        <input id="regex" type="text" class="form-control" />
+        <input id="regex" type="text" class="form-control" value="([A-Z])\w*" />
         <div class="input-group-append">
           <button id="show" class="btn btn-outline-secondary" type="button">Show</button>
+          <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" id="regexr-link">RegExr</a>
+          </div>
         </div>
       </div>
       <div class="collapse" id="error-alert-outside">
